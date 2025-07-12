@@ -1,3 +1,4 @@
+from django.shortcuts import render
 from django.shortcuts import get_object_or_404
 from django.views.generic import TemplateView, DetailView
 from django.http import HttpResponse
@@ -5,6 +6,7 @@ from django.template.response import TemplateResponse
 from .models import Category, Product, Size
 from django.db.models import Q
 
+# Create your views here.
 
 class IndexView(TemplateView):
     template_name = 'main/base.html'
@@ -31,7 +33,7 @@ class CatalogView(TemplateView):
         'color': lambda queryset, value: queryset.filter(color__iexact=value),
         'min_price': lambda queryset, value: queryset.filter(price_gte=value),
         'max_price': lambda queryset, value: queryset.filter(price_lte=value),
-        'size': lambda queryset, value: queryset.filter(product_sizes__size__name=value),
+        'size': lambda queryset, value: queryset.filter(product_size__size__name=value),
     }
 
 
@@ -89,7 +91,7 @@ class CatalogView(TemplateView):
                 return TemplateResponse(request, 'main/search_button.html', {})
             template = 'main/filter_modal.html' if request.GET.get('show_filters') == 'true' else 'main/catalog.html'
             return TemplateResponse(request, template, context)
-        return TemplateResponse(request, self.template, context)
+        return TemplateResponse(request, self.template_name, context)
     
 
 class ProductDetailView(DetailView):
@@ -113,6 +115,6 @@ class ProductDetailView(DetailView):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
         context = self.get_context_data(**kwargs)
-        if request.headers.get('HX-Request'):
+        if request.header.get('HX-Request'):
             return TemplateResponse(request, 'main/product_detail.html', context)
-        return TemplateResponse(request, self.template_name, context)
+        raise TemplateResponse(request, self.template_name, context)
